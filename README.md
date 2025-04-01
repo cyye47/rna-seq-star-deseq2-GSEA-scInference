@@ -10,7 +10,9 @@ The usage of this workflow is described in the [Snakemake Workflow Catalog](http
 
 Gather necessary information to make modifications of files
 config/samples.tsv: sample names, treatment conditions, jointly_handled (to monitor batch effect derived from lab, sequencer etc)
+
 config/units.tsv: sample names, fastq file path, adapter sequence (add -a ADAPTER_SEQUENCE), strandedness (default: none)
+
 config/config.yaml: this is the basic set up configuration. pay special attention to the (diffexp) section. the variables there need to match with config/samples.tsv column header
 
 
