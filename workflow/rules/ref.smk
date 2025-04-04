@@ -1,6 +1,6 @@
 rule get_genome:
     output:
-        "resources/genome.fasta",
+        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
     log:
         "logs/get-genome.log",
     params:
@@ -15,7 +15,7 @@ rule get_genome:
 
 rule get_annotation:
     output:
-        "resources/genome.gtf",
+        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genes.gtf",
     params:
         species=config["ref"]["species"],
         fmt="gtf",
@@ -31,9 +31,9 @@ rule get_annotation:
 
 rule genome_faidx:
     input:
-        "resources/genome.fasta",
+        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
     output:
-        "resources/genome.fasta.fai",
+        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa.fai",
     log:
         "logs/genome-faidx.log",
     cache: True
@@ -43,9 +43,9 @@ rule genome_faidx:
 
 rule bwa_index:
     input:
-        "resources/genome.fasta",
+        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
     output:
-        multiext("resources/genome.fasta", ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        multiext("/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     log:
         "logs/bwa_index.log",
     resources:
@@ -57,15 +57,24 @@ rule bwa_index:
 
 rule star_index:
     input:
-        fasta="resources/genome.fasta",
-        annotation="resources/genome.gtf",
+        fasta="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
+        gtf="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genes.gtf"
     output:
-        directory("resources/star_genome"),
+        directory("/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/star_genome")
     threads: 4
     params:
-        extra=lambda wc, input: f"--sjdbGTFfile {input.annotation} --sjdbOverhang 100",
+        sjdbOverhang=100,
     log:
         "logs/star_index_genome.log",
     cache: True
-    wrapper:
-        "v5.10.0/bio/star/index"
+    shell:
+        """
+        /opt/miniforge3/bin/star \
+        --runThreadN {threads} \
+        --runMode genomeGenerate \
+        --genomeDir {output} \
+        --genomeFastaFiles {input.fasta} \
+        --sjdbGTFfile {input.gtf} \
+        --sjdbOverhang {params.sjdbOverhang} \
+        &> {log}
+        """
