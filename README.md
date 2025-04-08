@@ -17,7 +17,7 @@ config/config.yaml: this is the basic set up configuration. pay special attentio
 
 ## Workflow structure
 
-The main workflow orchestration file is the main snakemake file called Snakefile. It calls modular snakemake files in in the rules directory, which is a standardized format for the command of each execution step, organized by input, output, shell command or wrapper, logging, parameters, conda run environment pointing to workflow/envs/, which will track software versions and should be updated after tool installation.
+The main workflow orchestration file is the main snakemake file called Snakefile. It calls modular snakemake files in in the rules directory, which is a standardized format for the command of each execution step, organized by input, output, shell command or wrapper, logging, parameters, conda run environment pointing to workflow/envs/, which track software versions and should be updated after tool installation.
 
 Custom scripts are saved in scripts directory. They can be called in snakemake file using script directive,  such as "../scripts/deseq2-init.R". This is useful to implement custom python or R scripts, such as deseq analysis.
 
@@ -37,11 +37,13 @@ Input and output files are saved in a bigger volume of 500Gb, mounted to EC2 as 
 
 ## Installation
 
-Make sure conda is installed first. You can download it from [here] (https://github.com/conda-forge/miniforge/releases/). For osx, install the x86_64 version because bioconda packages does not support arm64. Then add conda conda/bin to $PATH by modifying ~/.zshrc
+Make sure conda is installed first. You can download it from [here] (https://github.com/conda-forge/miniforge/releases/). For osx, install the x86_64 version because bioconda packages do not support arm64. Then add conda conda/bin to $PATH by modifying ~/.zshrc
 
-It should be version 24.7.1 or later. If not
+conda should be version >=24.7.1. If not
 
 conda update conda
+
+Then create the virtual environment
 
 mamba create -c conda-forge -c bioconda --name snakemake snakemake snakedeploy
 
@@ -53,13 +55,14 @@ conda config --show channels
 if needed
 conda config --add channels bioconda
 conda config --add channels conda-forge
+
 conda config --set channel_priority strict
 
 Then navigate to the project directory and activate the environment
 
 conda activate snakemake
 
-Navigate to the directory with Snakefile and execute command
+execute command
 
 snakemake --cores 2 --sdm conda
 
@@ -74,15 +77,11 @@ Current channels:
   - https://conda.anaconda.org/conda-forge
   - https://conda.anaconda.org/bioconda
 
-This is due to my computer running osx-arm64 architecture. Need to manually download and install the packages into executable
+This is due to my computer running osx-arm64 architecture. Switch to miniforge x86_64 version solved the problem.
 
-Download from https://github.com/alexdobin/STAR/archive/refs/tags/2.7.11b.tar.gz
-Then manually install
-tar -zxf STAR-2.7.11b.tar.gz
+linux EC2 instances should not have this issue.
 
-linux EC2 instances should not have this issue
-
-2. In STAR alignment error message.
+2. STAR alignment error message.
 
 Transcriptome.cpp:18:Transcriptome: exiting because of *INPUT FILE* error: could not open input file /geneInfo.tab
 
@@ -90,16 +89,37 @@ This error has been reported for the latest 2.7.11b version of STAR, and an olde
 
 sudo conda install -c bioconda star=2.7.5a
 
-Then modify align.smk, ref.smk where star is called; change wrapper into shell so that it will run the locally installed star instead of downloading 2.7.11b from bioconda
+Then modify align.smk and ref.smk where star is called; change wrapper into shell so that it will run the locally installed star instead of downloading 2.7.11b from bioconda
 /opt/miniforge3/bin/star
-Note because I'm running on osx, zcat doesn't work the same way as in linux. The following line need to be changed
---readFilesCommand zcat should be changed into
+
+Note because I'm running on osx, zcat doesn't work the same way as in linux. The following line need to be changed in align.smk
+
+--readFilesCommand zcat
+should be changed into
 --readFilesCommand gunzip -c 
+
+## GSEA addition
+1. Added rule gsea in diffexp.smk
+
+2. Added gsea.yaml to designate dependencies of bioconda packages and versions compatible with the current operating system: 
+  - bioconductor-org.sc.sgd.db =3.20
+  - r-dplyr =1.1
+  - bioconductor-dose =3.6
+  - bioconductor-enrichplot =1.26
+  - bioconductor-clusterprofiler =4.14
+  - r-readr =2.1
+
+3. Change get_final_output() in common.smk to reflect GSEA result file as the final_output
 
 ## Need to do
 
 1. test installation and small sample run (complete)
-2. add GSEA R script and smk file
+
+2. add GSEA R script and modify diffexp.smk file to include GSEA rule (partially complete)
+  issue here with mac osx when loading igraph package required by clusterProfiler and enrichplot, that  Library not loaded: @rpath/libxml2.2.dylib. This will potentially be solved in the linux environment
+
 3. add single cell inference R script and smk file
+
 4. add olink analysis workflow (separate snakemake workflow if no inference needed)
+
 5. full sample run

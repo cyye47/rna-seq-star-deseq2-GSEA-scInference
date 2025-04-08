@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - bioconductor-org.sc.sgd.db =3.20
+  - r-dplyr =1.1
+  - bioconductor-dose =4.0
+  - bioconductor-enrichplot =1.26
+  - bioconductor-clusterprofiler =4.14
+  - r-readr =2.1

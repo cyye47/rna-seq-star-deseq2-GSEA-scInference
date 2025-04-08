@@ -14,7 +14,7 @@ samples = (
 
 def get_final_output():
     final_output = expand(
-        "results/diffexp/{contrast}.diffexp.symbol.tsv",
+        "results/gsea/{contrast}/{contrast}.gsea_go_dge_all_results.tsv",
         contrast=config["diffexp"]["contrasts"],
     )
     final_output.append("results/deseq2/normcounts.symbol.tsv")

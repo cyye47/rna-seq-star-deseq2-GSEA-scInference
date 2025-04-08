@@ -75,3 +75,16 @@ rule deseq2:
     threads: get_deseq2_threads()
     script:
         "../scripts/deseq2.R"
+
+rule gsea:
+    input:
+        diffexpr="results/diffexp/{contrast}.diffexp.tsv"
+    output:
+        output_go="results/gsea/{contrast}/{contrast}.gsea_go_dge_all_results.tsv",
+        output_dir="results/gsea/{contrast}"
+    conda:
+        "../envs/gsea.yaml"
+    log:
+        "logs/gsea/{contrast}.gsea.log",
+    script:
+        "../scripts/gsea.R"
