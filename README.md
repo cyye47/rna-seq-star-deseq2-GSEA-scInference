@@ -13,7 +13,7 @@ config/samples.tsv: sample names, treatment conditions, jointly_handled (to moni
 
 config/units.tsv: sample names, unit names (same sample sequenced in multiple lanes?), fastq file path, adapter sequence (add -a ADAPTER_SEQUENCE), strandedness (default: none)
 
-config/config.yaml: this is the basic set up configuration. pay special attention to the (diffexp) section. the variables there need to match with config/samples.tsv column header
+config/config.yaml: this is the basic set up configuration. the reference files and result directories should be updated for each analysis. pay special attention to the (diffexp) section. the variables there need to match with config/samples.tsv column header
 
 ## Workflow structure
 
@@ -31,40 +31,59 @@ resources directory host downloaded genome fasta, gtf files and indices. When us
 
 ## Data storage
 
-Snakemake files and associated scripts are saved in a smaller volume of 50Gb, mounted to EC2 as data1. This volume is backed up with a snapshot image, and can be reused with future projects. Changes need to be made to the files under config directory to capture sample, unit information and contrast customization in deseq analysis. Also genome index in resources directory will need to be amended if working with a new species.
+Snakemake files, associated scripts and resource files are saved in a smaller volume of 50Gb, mounted to EC2 as data1. This volume is backed up with a snapshot image, and can be reused with future projects. Genome index in resources directory needs to be amended if working with a new species.
 
-Input and output files are saved in a bigger volume of 500Gb, mounted to EC2 as data2 for processing, and unmounted and deleted when the project is completed and all the data is backed up in s3.
+Config, input and result files are saved in a bigger volume of 500Gb, mounted to EC2 as data2 for processing, and unmounted and deleted after the project is completed and all the data is backed up in s3. Changes need to be made to the files under config directory to capture sample, unit information and contrast customization in deseq analysis.
 
 ## Installation
 
 Make sure conda is installed first. You can download it from [here] (https://github.com/conda-forge/miniforge/releases/). For osx, install the x86_64 version because bioconda packages do not support arm64. Then add conda conda/bin to $PATH by modifying ~/.zshrc
 
+```
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/opt/miniforge3/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/miniforge3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+```
+
 conda should be version >=24.7.1. If not
 
-conda update conda
+```conda update conda```
 
 Then create the virtual environment
 
-mamba create -c conda-forge -c bioconda --name snakemake snakemake snakedeploy
+```mamba create -c conda-forge -c bioconda --name snakemake snakemake snakedeploy```
 
 conda-forge and bioconda host necessary packages
 
 Make sure both conda-forge and bioconda channels are available to install necessary packages
-conda config --show channels
+
+```conda config --show channels```
 
 if needed
-conda config --add channels bioconda
-conda config --add channels conda-forge
 
-conda config --set channel_priority strict
+```conda config --add channels bioconda```
+```conda config --add channels conda-forge```
+
+```conda config --set channel_priority strict```
 
 Then navigate to the project directory and activate the environment
 
-conda activate snakemake
+```conda activate snakemake```
 
 execute command
 
-snakemake --cores 2 --sdm conda
+```snakemake --cores 2 --sdm conda```
 
 ## Issues
 
@@ -89,27 +108,33 @@ This error has been reported for the latest 2.7.11b version of STAR, and an olde
 
 sudo conda install -c bioconda star=2.7.5a
 
-Then modify align.smk and ref.smk where star is called; change wrapper into shell so that it will run the locally installed star instead of downloading 2.7.11b from bioconda
-/opt/miniforge3/bin/star
+Then modify align.smk and ref.smk where star is called; change "wrapper" into "shell" so that it will run the locally installed star instead of downloading 2.7.11b from bioconda: /opt/miniforge3/bin/star
 
 Note because I'm running on osx, zcat doesn't work the same way as in linux. The following line need to be changed in align.smk
 
 --readFilesCommand zcat
+
 should be changed into
+
 --readFilesCommand gunzip -c 
 
 ## GSEA addition
 1. Added rule gsea in diffexp.smk
 
-2. Added gsea.yaml to designate dependencies of bioconda packages and versions compatible with the current operating system: 
-  - bioconductor-org.sc.sgd.db =3.20
+2. Added gsea.yaml to designate dependencies of bioconda packages and versions compatible with the current operating system:
+
+  - bioconductor-org.hs.eg.db =3.20 # this needs to be adjusted based on species used in the experiment
   - r-dplyr =1.1
   - bioconductor-dose =3.6
   - bioconductor-enrichplot =1.26
   - bioconductor-clusterprofiler =4.14
   - r-readr =2.1
+  - r-ggridges =0.5
+  - r-ggplot2 =3.5
 
 3. Change get_final_output() in common.smk to reflect GSEA result file as the final_output
+
+4. Pay special attention to library(org.hs.eg.db) in gsea.R. This should correspond to the species used in the experiment
 
 ## Need to do
 

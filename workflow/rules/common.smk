@@ -11,15 +11,17 @@ samples = (
     .sort_index()
 )
 
+RESULTS_DIR = config["results_dir"]
 
 def get_final_output():
     final_output = expand(
-        "results/gsea/{contrast}/{contrast}.gsea_go_dge_all_results.tsv",
-        contrast=config["diffexp"]["contrasts"],
+        "{results_dir}/gsea/{contrast}/gsea_go_dge_all_results.tsv",
+        contrast=list(config["diffexp"]["contrasts"].keys()),
+        results_dir=RESULTS_DIR
     )
-    final_output.append("results/deseq2/normcounts.symbol.tsv")
-    final_output.append("results/counts/all.symbol.tsv")
-    final_output.append("results/qc/multiqc_report.html")
+    final_output.append(RESULTS_DIR + "/deseq2/normcounts.symbol.tsv")
+    final_output.append(RESULTS_DIR + "/counts/all.symbol.tsv")
+    final_output.append(RESULTS_DIR + "/qc/multiqc_report.html")
 
     if config["pca"]["activate"]:
         # get all the variables to plot a PCA for
@@ -29,7 +31,10 @@ def get_final_output():
         if config["pca"]["labels"]:
             pca_variables.extend(config["pca"]["labels"])
         final_output.extend(
-            expand("results/pca.{variable}.svg", variable=pca_variables)
+            expand(
+                "{results_dir}/pca.{variable}.svg", 
+                variable=pca_variables,
+                results_dir=RESULTS_DIR)
         )
     return final_output
 
@@ -109,15 +114,16 @@ def get_fq(wildcards):
                 zip(
                     ["fq1", "fq2"],
                     expand(
-                        "results/trimmed/{sample}_{unit}_{group}.fastq.gz",
+                        "{results_dir}/trimmed/{sample}_{unit}_{group}.fastq.gz",
                         group=["R1", "R2"],
+                        results_dir=RESULTS_DIR,
                         **wildcards,
                     ),
                 )
             )
         # single end sample
         return {
-            "fq1": "results/trimmed/{sample}_{unit}_single.fastq.gz".format(**wildcards)
+            "fq1": RESULTS_DIR + "/trimmed/{sample}_{unit}_single.fastq.gz".format(**wildcards)
         }
     else:
         # no trimming, use raw reads
@@ -171,8 +177,9 @@ def get_bioc_species_name():
 def get_fastqs(wc):
     if config["trimming"]["activate"]:
         return expand(
-            "results/trimmed/{sample}/{unit}_{read}.fastq.gz",
+            "{results_dir}/trimmed/{sample}/{unit}_{read}.fastq.gz",
             unit=units.loc[wc.sample, "unit_name"],
+            results_dir=RESULTS_DIR,
             sample=wc.sample,
             read=wc.read,
         )

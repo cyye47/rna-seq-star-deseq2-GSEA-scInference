@@ -1,8 +1,10 @@
+LOG_DIR = config["log_dir"]
+
 rule get_genome:
     output:
-        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
+        config["ref"]["fa_file"],
     log:
-        "logs/get-genome.log",
+        LOG_DIR + "/get-genome.log",
     params:
         species=config["ref"]["species"],
         datatype="dna",
@@ -15,7 +17,7 @@ rule get_genome:
 
 rule get_annotation:
     output:
-        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genes.gtf",
+        config["ref"]["gtf_file"],
     params:
         species=config["ref"]["species"],
         fmt="gtf",
@@ -24,18 +26,18 @@ rule get_annotation:
         flavor="",
     cache: True
     log:
-        "logs/get_annotation.log",
+        LOG_DIR + "/get_annotation.log",
     wrapper:
         "v5.10.0/bio/reference/ensembl-annotation"
 
 
 rule genome_faidx:
     input:
-        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
+        config["ref"]["fa_file"],
     output:
-        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa.fai",
+        config["ref"]["fa.fai_file"],
     log:
-        "logs/genome-faidx.log",
+        LOG_DIR + "/genome-faidx.log",
     cache: True
     wrapper:
         "v5.10.0/bio/samtools/faidx"
@@ -43,11 +45,11 @@ rule genome_faidx:
 
 rule bwa_index:
     input:
-        "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
+        config["ref"]["fa_file"],
     output:
-        multiext("/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa", ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        multiext(config["ref"]["fa_file"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
     log:
-        "logs/bwa_index.log",
+        LOG_DIR + "/bwa_index.log",
     resources:
         mem_mb=369000,
     cache: True
@@ -57,15 +59,15 @@ rule bwa_index:
 
 rule star_index:
     input:
-        fasta="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genome.fa",
-        gtf="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genes.gtf"
+        fasta=config["ref"]["fa_file"],
+        gtf=config["ref"]["gtf_file"]
     output:
-        directory("/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/star_genome")
+        directory(config["ref"]["star_dir"])
     threads: 4
     params:
         sjdbOverhang=100,
     log:
-        "logs/star_index_genome.log",
+        LOG_DIR + "/star_index_genome.log",
     cache: True
     shell:
         """

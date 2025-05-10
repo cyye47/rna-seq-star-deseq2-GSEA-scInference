@@ -5,7 +5,7 @@ min_version("8.8.0")
 
 
 ##### setup report #####
-configfile: "config_basic/config.yaml"
+configfile: "/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/data/practice/config/config.yaml"
 
 
 report: "report/workflow.rst"
@@ -31,7 +31,6 @@ include: "rules/diffexp.smk"
 
 
 ##### target rules #####
-
 
 rule all:
     input:

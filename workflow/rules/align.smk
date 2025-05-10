@@ -1,16 +1,19 @@
+RESULTS_DIR = config["results_dir"]
+LOG_DIR = config["log_dir"]
+
 rule align:
     input:
         unpack(get_fq),
-        index="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/star_genome",
-        gtf="/Users/chaoyangye/Documents/Consulting/BridgeInfomatics/resources/scerevisiae_R64-1-1/genes.gtf"
+        index=config["ref"]["star_dir"],
+        gtf=config["ref"]["gtf_file"]
     output:
-        aln="results/star/{sample}_{unit}/Aligned.sortedByCoord.out.bam",
-        reads_per_gene="results/star/{sample}_{unit}/ReadsPerGene.out.tab"
+        aln = RESULTS_DIR + "/star/{sample}_{unit}/Aligned.sortedByCoord.out.bam",
+        reads_per_gene = RESULTS_DIR + "/star/{sample}_{unit}/ReadsPerGene.out.tab"
     threads: 4
     log:
-        "logs/star/{sample}_{unit}.log",
+        LOG_DIR + "/star/{sample}_{unit}.log",
     params:
-        out_prefix="results/star/{sample}_{unit}/",
+        out_prefix = RESULTS_DIR + "/star/{sample}_{unit}/",
         fq2 = lambda wildcards, input: input.fq2 if "fq2" in input else ""
     shell:
         """

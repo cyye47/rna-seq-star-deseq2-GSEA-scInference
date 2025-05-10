@@ -1,9 +1,12 @@
+RESULTS_DIR = config["results_dir"]
+LOG_DIR = config["log_dir"]
+
 rule get_sra:
     output:
         "sra/{accession}_1.fastq",
         "sra/{accession}_2.fastq",
     log:
-        "logs/get-sra/{accession}.log",
+        LOG_DIR + "/get-sra/{accession}.log",
     wrapper:
         "v5.10.0/bio/sra-tools/fasterq-dump"
 
@@ -14,7 +17,7 @@ rule cutadapt_pipe:
     output:
         pipe("pipe/cutadapt/{sample}/{unit}.{fq}.{ext}"),
     log:
-        "logs/pipe-fastqs/catadapt/{sample}_{unit}.{fq}.{ext}.log",
+        LOG_DIR + "/pipe-fastqs/catadapt/{sample}_{unit}.{fq}.{ext}.log",
     wildcard_constraints:
         ext=r"fastq|fastq\.gz",
     threads: 0
@@ -26,11 +29,11 @@ rule cutadapt_pe:
     input:
         get_cutadapt_input,
     output:
-        fastq1="results/trimmed/{sample}_{unit}_R1.fastq.gz",
-        fastq2="results/trimmed/{sample}_{unit}_R2.fastq.gz",
-        qc="results/trimmed/{sample}_{unit}.paired.qc.txt",
+        fastq1 = RESULTS_DIR + "/trimmed/{sample}_{unit}_R1.fastq.gz",
+        fastq2 = RESULTS_DIR + "/trimmed/{sample}_{unit}_R2.fastq.gz",
+        qc = RESULTS_DIR + "/trimmed/{sample}_{unit}.paired.qc.txt",
     log:
-        "logs/cutadapt/{sample}_{unit}.log",
+        LOG_DIR + "/cutadapt/{sample}_{unit}.log",
     params:
         extra=config["params"]["cutadapt-pe"],
         adapters=lambda w: str(units.loc[w.sample].loc[w.unit, "adapters"]),
@@ -43,10 +46,10 @@ rule cutadapt_se:
     input:
         get_cutadapt_input,
     output:
-        fastq="results/trimmed/{sample}_{unit}_single.fastq.gz",
-        qc="results/trimmed/{sample}_{unit}_single.qc.txt",
+        fastq = RESULTS_DIR + "/trimmed/{sample}_{unit}_single.fastq.gz",
+        qc = RESULTS_DIR + "/trimmed/{sample}_{unit}_single.qc.txt",
     log:
-        "logs/cutadapt/{sample}_{unit}.log",
+        LOG_DIR + "/cutadapt/{sample}_{unit}.log",
     params:
         extra=config["params"]["cutadapt-se"],
         adapters=lambda w: str(units.loc[w.sample].loc[w.unit, "adapters"]),
