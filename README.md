@@ -88,13 +88,14 @@ execute command
 ## Issues
 
 1. PackagesNotFoundError: The following packages are not available from current channels:
-
-  - star=2.7.11b*
+```- star=2.7.11b*```
 
 Current channels:
 
-  - https://conda.anaconda.org/conda-forge
-  - https://conda.anaconda.org/bioconda
+```
+- https://conda.anaconda.org/conda-forge
+- https://conda.anaconda.org/bioconda
+```
 
 This is due to my computer running osx-arm64 architecture. Switch to miniforge x86_64 version solved the problem.
 
@@ -112,17 +113,17 @@ Then modify align.smk and ref.smk where star is called; change "wrapper" into "s
 
 Note because I'm running on osx, zcat doesn't work the same way as in linux. The following line need to be changed in align.smk
 
---readFilesCommand zcat
+```--readFilesCommand zcat```
 
 should be changed into
 
---readFilesCommand gunzip -c 
+```--readFilesCommand gunzip -c```
 
 ## GSEA addition
 1. Added rule gsea in diffexp.smk
 
 2. Added gsea.yaml to designate dependencies of bioconda packages and versions compatible with the current operating system:
-
+```
   - bioconductor-org.hs.eg.db =3.20 # this needs to be adjusted based on species used in the experiment
   - r-dplyr =1.1
   - bioconductor-dose =3.6
@@ -131,6 +132,7 @@ should be changed into
   - r-readr =2.1
   - r-ggridges =0.5
   - r-ggplot2 =3.5
+```
 
 3. Change get_final_output() in common.smk to reflect GSEA result file as the final_output
 
