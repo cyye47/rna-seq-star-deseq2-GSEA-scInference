@@ -142,8 +142,7 @@ should be changed into
 
 1. test installation and small sample run (complete)
 
-2. add GSEA R script and modify diffexp.smk file to include GSEA rule (partially complete)
-  issue here with mac osx when loading igraph package required by clusterProfiler and enrichplot, that  Library not loaded: @rpath/libxml2.2.dylib. This will potentially be solved in the linux environment
+2. add GSEA R script and modify diffexp.smk file to include GSEA rule (complete)
 
 3. add single cell inference R script and smk file
 
