@@ -21,21 +21,10 @@ def get_final_output():
     )
     final_output.append(RESULTS_DIR + "/deseq2/normcounts.symbol.tsv")
     final_output.append(RESULTS_DIR + "/counts/all.symbol.tsv")
+    final_output.append(RESULTS_DIR + "/counts/all_tpm.symbol.tsv")
     final_output.append(RESULTS_DIR + "/qc/multiqc_report.html")
-
-    if config["pca"]["activate"]:
-        # get all the variables to plot a PCA for
-        pca_variables = list(config["diffexp"]["variables_of_interest"])
-        if config["diffexp"]["batch_effects"]:
-            pca_variables.extend(config["diffexp"]["batch_effects"])
-        if config["pca"]["labels"]:
-            pca_variables.extend(config["pca"]["labels"])
-        final_output.extend(
-            expand(
-                "{results_dir}/pca.{variable}.svg", 
-                variable=pca_variables,
-                results_dir=RESULTS_DIR)
-        )
+    final_output.append(RESULTS_DIR + "/pca.svg")
+    final_output.append(RESULTS_DIR + "/sc_infer/cell_proportion.tsv")
     return final_output
 
 

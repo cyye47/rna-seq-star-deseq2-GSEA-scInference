@@ -119,6 +119,20 @@ should be changed into
 
 ```--readFilesCommand gunzip -c```
 
+## TPM calculation addition
+1. Added rule calc_TPM in diffexp.smk
+
+2. Added 
+```
+- bioconductor-genomicfeatures =1.58
+- bioconductor-txdbmaker =1.2
+```
+to deseq2.yaml dependencies
+
+3. Change get_final_output() in common.smk to reflect TPM count matrix file as part of the final_output
+
+4. Added calc_TPM.R to scripts
+
 ## GSEA addition
 1. Added rule gsea in diffexp.smk
 
@@ -136,7 +150,21 @@ should be changed into
 
 3. Change get_final_output() in common.smk to reflect GSEA result file as the final_output
 
-4. Pay special attention to library(org.hs.eg.db) in gsea.R. This should correspond to the species used in the experiment
+4. Added gsea.R to scripts
+
+5. Pay special attention to library(org.hs.eg.db) in gsea.R. This should correspond to the species used in the experiment
+
+## Single cell inference addition
+1. Added rule gsea in sc_infer.smk
+
+2. Added sc_infer.yaml to designate dependencies of bioconda packages and versions compatible with the current operating system:
+```
+  - bioconductor-granulator =1.14
+```
+
+3. Change get_final_output() in common.smk to reflect single cell inference result file as the final_output
+
+4. Added sc_infer.R to scripts
 
 ## Need to do
 
@@ -144,8 +172,10 @@ should be changed into
 
 2. add GSEA R script and modify diffexp.smk file to include GSEA rule (complete)
 
-3. add single cell inference R script and smk file
+3. add TPM count matrix (complete)
 
-4. add olink analysis workflow (separate snakemake workflow if no inference needed)
+4. add single cell inference R script and smk file (complete)
 
-5. full sample run
+5. add olink analysis workflow (separate snakemake workflow if no inference needed)
+
+6. full sample run

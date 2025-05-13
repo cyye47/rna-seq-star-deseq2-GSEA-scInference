@@ -19,6 +19,18 @@ rule count_matrix:
     script:
         "../scripts/count-matrix.py"
 
+rule calc_TPM:
+    input:
+        gtf = config["ref"]["gtf_file"],
+        counts = RESULTS_DIR + "/counts/all.tsv",
+    output:
+        RESULTS_DIR + "/counts/all_tpm.tsv",
+    log:
+        LOG_DIR + "/calc_TPM.log"
+    conda:
+        "../envs/calc_TPM.yaml"
+    script:
+        "../scripts/calc_TPM.R"
 
 rule gene_2_symbol:
     input:
@@ -54,11 +66,11 @@ rule pca:
     input:
         RESULTS_DIR + "/deseq2/all.rds",
     output:
-        report(RESULTS_DIR + "/pca.{variable}.svg", "../report/pca.rst"),
+        report(RESULTS_DIR + "/pca.svg", "../report/pca.rst"),
     conda:
         "../envs/deseq2.yaml"
     log:
-        LOG_DIR + "/pca.{variable}.log",
+        LOG_DIR + "/pca.log",
     script:
         "../scripts/plot-pca.R"
 

@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - bioconductor-genomicfeatures =1.58
+  - bioconductor-txdbmaker =1.2

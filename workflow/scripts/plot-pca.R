@@ -10,5 +10,5 @@ dds <- readRDS(snakemake@input[[1]])
 # obtain normalized counts
 counts <- rlog(dds, blind=FALSE)
 svg(snakemake@output[[1]])
-plotPCA(counts, intgroup = snakemake@wildcards[["variable"]])
+plotPCA(counts, intgroup = snakemake@config[["diffexp"]][["variables_of_interest"]])
 dev.off()
